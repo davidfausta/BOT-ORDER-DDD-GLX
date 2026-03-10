@@ -180,6 +180,6 @@ Status sebelumnya: ${statusMap[oldStatus] || oldStatus}
 
 // Start Server
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`📡 WA Bot Server API running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`📡 WA Bot Server API running on port ${PORT}`);
 });

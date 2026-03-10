@@ -13,7 +13,14 @@ app.use(express.json());
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--no-first-run',
+            '--no-zygote'
+        ]
     }
 });
 
@@ -212,6 +219,6 @@ Status sebelumnya: ${statusMap[oldStatus] || oldStatus}
 
 // Start Server
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
     console.log(`📡 WA Bot Server API running on port ${PORT}`);
 });

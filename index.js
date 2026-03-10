@@ -1,4 +1,5 @@
-const qrcode = require('qrcode-terminal');
+const qrcodeTerminal = require('qrcode-terminal');
+const qrcodeImage = require('qrcode');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const express = require('express');
 const cors = require('cors');
@@ -17,15 +18,18 @@ const client = new Client({
 });
 
 let isClientReady = false;
+let currentQR = '';
 
 client.on('qr', (qr) => {
     console.log('--- SCAN QR CODE INI DENGAN WHATSAPP ANDA ---');
-    qrcode.generate(qr, { small: true });
+    qrcodeTerminal.generate(qr, { small: true });
+    currentQR = qr; // Simpan QR string untuk ditampilkan di web
 });
 
 client.on('ready', () => {
     console.log('✅ WhatsApp Bot is Ready!');
     isClientReady = true;
+    currentQR = ''; // Hapus QR dari memory karena sudah login
 });
 
 client.on('authenticated', () => {
@@ -55,6 +59,34 @@ const formatPhoneNumber = (number) => {
 // ==========================================
 // API ENDPOINTS (DIPANGGIL DARI REACT APP)
 // ==========================================
+
+// Endpoint: Tampilkan QR Code di Browser
+app.get('/qr', async (req, res) => {
+    if (isClientReady) {
+        return res.send('<h3>✅ Bot WhatsApp sudah sukses login. Tidak perlu scan QR lagi.</h3>');
+    }
+
+    if (!currentQR) {
+        return res.send('<h3>⏳ Sedang memuat QR Code. Refresh halaman ini 5 detik lagi...</h3>');
+    }
+
+    try {
+        const qrImage = await qrcodeImage.toDataURL(currentQR);
+        res.send(`
+            <html>
+                <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#111; color:white; font-family:sans-serif;">
+                    <h2>Scan QR Code Bawah Ini Dengan WhatsApp Anda</h2>
+                    <div style="background:white; padding:20px; border-radius:10px;">
+                        <img src="${qrImage}" alt="WhatsApp QR Code" />
+                    </div>
+                    <p>Setelah di-scan, tutup halaman ini.</p>
+                </body>
+            </html>
+        `);
+    } catch (err) {
+        res.status(500).send('Gagal membuat gambar QR Code');
+    }
+});
 
 // Endpoint 1: Notifikasi Order Baru ke Grup (dan info ke Pemohon)
 app.post('/api/send-order', async (req, res) => {

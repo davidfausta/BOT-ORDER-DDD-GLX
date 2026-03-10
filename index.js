@@ -19,7 +19,7 @@ const client = new Client({
 let isClientReady = false;
 
 client.on('qr', (qr) => {
-    console.log('\n--- SCAN QR CODE INI DENGAN WHATSAPP ANDA ---');
+    console.log('--- SCAN QR CODE INI DENGAN WHATSAPP ANDA ---');
     qrcode.generate(qr, { small: true });
 });
 
